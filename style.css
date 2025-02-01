@@ -8,6 +8,28 @@ body{
     display: none !important;
 }
 
+.selected{
+    background-color: #2d3a3a !important;
+}
+
+.invalid{
+    border-color: red !important;
+}
+
+.aproved{
+    background-color: #2ba84ac4 !important;
+}
+
+.denegated{
+    background-color: rgba(255, 0, 0, 0.802) !important;
+}
+
+#close-modal{
+    color: #dad7cd;
+    font-size: 45px;
+    cursor: pointer;
+}
+
 .message-modal{
     z-index: 999;
     height: 100vh;
@@ -20,29 +42,15 @@ body{
     align-items: center;
 }
 
-.modal-error{
-    background-color: rgba(255, 0, 0, 0.802);
-}
-
-.modal-error h1{
+.message-modal h1{
     color: #dad7cd !important;
     margin: 0px !important;
     text-align: center;
 }
 
-.modal-error p{
+.message-modal p{
     color: #dad7cd !important;
     margin-top: 40px !important;
-}
-
-
-.modal-ok{
-    background-color: #2ba84ac4;
-}
-
-.modal-ok h1{
-    color: #dad7cd !important;
-    margin: 0px !important;
 }
 
 .modal{
@@ -65,6 +73,10 @@ body{
     width: 80%; 
     height: fit-content;
     border-radius: 30px;
+}
+
+.card h1{
+    margin-bottom: 0px !important;
 }
 
 .container{
@@ -215,6 +227,3 @@ input, select{
     text-align: center;
 }
 
-.selected{
-    background-color: #2d3a3a !important;
-}

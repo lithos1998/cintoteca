@@ -7,15 +7,10 @@
     <title>Inventario</title>
 </head>
 <body>
-    <div id="modalOkId" class="message-modal modal-ok d-none">
-        <h1 id="modal_ok_title"></h1>
-        <h1 style="margin-top: 20px !important;">✔</h1>
-    </div>
-
-    <div id="modalErrorId" class="message-modal modal-error d-none">
-        <h1 id="modal_error_title">Ocurrion un error</h1>
-        <h1 style="margin-top: 0px !important;">⊗</h1>
-        <p></p>
+    <div id="modal-notification" class="message-modal d-none">
+        <h1 id="notification-title"></h1>
+        <h1 id="notification-icon" style="margin-top: 20px !important;"></h1>
+        <p id="notification-text"></p>
     </div>
 
     <div id="modal-add" class="modal d-none">
@@ -61,12 +56,12 @@
 
                     <div>
                         <label>De:</label>
-                        <input id="codigo-de" name="codigo-de" type="text" placeholder="4400">
+                        <input id="codigo-de" class="" name="codigo-de" type="text" placeholder="4400">
                     </div>
                         
                     <div>
                         <label>Hasta:</label>
-                        <input id="codigo-hasta" name="codigo-hasta" type="text" placeholder="4449">
+                        <input id="codigo-hasta" class="" name="codigo-hasta" type="text" placeholder="4449">
                     </div>
 
                     <div>
@@ -101,6 +96,7 @@
                 <div id="g"></div>
             </div>
         </div>
+        <p id="close-modal">⊗</p>
     </div>
 
     <div class="container">
@@ -129,106 +125,147 @@
     </div>
 
     <script>
+        // variables
         modal = document.getElementById("modal-add");
-        modal_error = document.getElementById("modalErrorId");
-        modal_ok = document.getElementById("modalOkId");
         modal_show = document.getElementById("modal-show");
-
+        modal_notification = document.getElementById("modal-notification");
+        noti_title = document.getElementById("notification-title");
+        noti_icon = document.getElementById("notification-icon");
+        noti_text = document.getElementById("notification-text");
+        icon_error = "⊗";
+        icon_succes = "✔";
+        
+        // functions
         function viewModal(modal, option) {
             if (option == "show") {
                 modal.classList.remove("d-none");
             } else {
                 modal.classList.add("d-none");
-            }            
+                modal_notification.classList.remove("aproved", "denegated");
+            }    
         }
 
-        document.getElementById("modalErrorId").addEventListener("click", function(){
-            viewModal(modal_error, "hide");
-        });
+        // listeners
+        modal_notification.addEventListener("click",() => viewModal(modal_notification, "hide"));
 
-        document.getElementById("modalOkId").addEventListener("click", function(){
-            viewModal(modal_ok, "hide");
-        });
+        document.getElementById("add-cintas").addEventListener("click",() => viewModal(modal, "show"));
 
-        document.getElementById("add-cintas").addEventListener("click", function () {
-            viewModal(modal, "show");
-        });
+        document.getElementById("cancel-add").addEventListener("click",() => viewModal(modal, "hide"));
 
-        document.getElementById("cancel-add").addEventListener("click", function () {
-            viewModal(modal, "hide");
-        });
+        document.getElementById("close-modal").addEventListener("click",() => viewModal(modal_show, "hide"));
 
+        // petitions
         document.getElementById("search").addEventListener("submit", function (event) {
             event.preventDefault();
+            
+            if (document.getElementById("codigo").value != "") {
+                let formData = {
+                    sufijo: document.getElementById("sufijo").value,
+                    codigo: document.getElementById("codigo").value,
+                    generacion: document.getElementById("generacion").value,
+                }
 
-            let formData = {
-                sufijo: document.getElementById("sufijo").value,
-                codigo: document.getElementById("codigo").value,
-                generacion: document.getElementById("generacion").value,
+                fetch('https://carlosriveros.online/api/viewLocation',{
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    status = response.status; 
+                    
+                    if(status == 404){
+                        noti_title.innerText = "No se encontro la cinta";
+                        noti_icon.innerText = icon_error;
+                        modal_notification.classList.add("denegated");
+
+                        viewModal(modal_notification, "show");
+                    }
+                    return response.json()
+                })
+                .then(data => {
+                    console.log(data);
+
+                    data = data['content'];
+
+                    if (data['codigo'] != undefined) {
+                        let clase = data['estante'];
+                        document.getElementById("cinta").innerText = data['codigo'];
+                        document.getElementById("estanteria-loc").innerText = data['estanteria'];
+                        document.getElementById(clase).classList.add('selected');
+                        document.getElementById(clase).innerHTML = "<p>"+clase+"</p>";
+
+                        viewModal(modal_show, "show");
+                    }                    
+                })
+                .catch(error => console.error("Error al obtener los datos:", error));
+            } else {
+                document.getElementById("codigo").classList.add("invalid");
             }
+            
+        });
 
-            fetch('http://localhost:8000/api/viewLocation',{
+        document.getElementById("add").addEventListener("submit", function (event) { 
+            event.preventDefault();
+
+            if (document.getElementById("codigo-de").value != "" || document.getElementById("codigo-hasta").value != "") {
+                let formData = {
+                    estanteria: document.getElementById("estanteria").value,
+                    estante: document.getElementById("estante").value,
+                    tipo: document.getElementById("tipo-cinta").value,
+                    codigo_de: document.getElementById("codigo-de").value,
+                    codigo_hasta: document.getElementById("codigo-hasta").value,
+                    generacion: document.getElementById("generacion").value,
+                }
+
+                fetch("https://carlosriveros.online/api/addCintas", { 
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json"
                 },
                 body: JSON.stringify(formData)
-            })
-            .then(response => {
-                status = response.status; 
-                
-                if(status == 404){
-                    viewModal(modal_error, "show");
-                    document.getElementById("modal_error_title").innerText = "No se encontro la cinta";
-                }
-                return response.json()
-            })
-            .then(data => {
-                console.log(data);
+                })
+                .then(response => {
+                    let status = response.status;
+                    let message = "";
+                    let icon = "";
+                    let noti_class = ""; 
 
-                if (data['content']['codigo'] != undefined) {
-                    let clase = data['content']['estante'];
-                    document.getElementById("cinta").innerText = data['content']['codigo'];
-                    document.getElementById("estanteria-loc").innerText = data['content']['estanteria'];
-                    document.getElementById(clase).classList.add('selected');
-                    document.getElementById(clase).innerHTML = "<p>"+clase+"</p>";
-                    viewModal(modal_show, "show");
-                }
-                
-            })
-            .catch(error => console.error("Error al obtener los datos:", error));
-        });
+                    if (status == 200) {
+                        message = "Se agregaron las cintas correctamente";
+                        icon = icon_succes;   
+                        noti_class = "aproved";                   
+                    } else {
+                        message = "Ocurrio un error";
+                        icon = icon_error;
+                        noti_class = "denegated";
+                    }
+                    
+                    noti_title.innerText = message;
+                    noti_icon.innerText = icon;
+                    modal_notification.classList.add(noti_class);
 
-        document.getElementById("add").addEventListener("submit", function (event) { 
-            event.preventDefault();
-            let formData = {
-                estanteria: document.getElementById("estanteria").value,
-                estante: document.getElementById("estante").value,
-                tipo: document.getElementById("tipo-cinta").value,
-                codigo_de: document.getElementById("codigo-de").value,
-                codigo_hasta: document.getElementById("codigo-hasta").value,
-                generacion: document.getElementById("generacion").value,
+                    viewModal(modal_notification, "show");
+                    
+
+                    return response.json()
+                })
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+                
+                viewModal(modal, "hide"); 
+            }else{
+                document.getElementById("codigo-de").classList.add("invalid");
+                document.getElementById("codigo-hasta").classList.add("invalid");
             }
-
-            fetch("http://localhost:8000/api/addcintas", { 
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById("modalOkId").classList.remove("d-none");
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-            
-            viewModal(modal, "hide"); 
-        });
+        }); 
     </script>
 </body>
 </html>
