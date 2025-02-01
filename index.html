@@ -102,14 +102,14 @@
     <div class="container">
         <div class="cuadro-busqueda">
             <form id="search">
-                <select id="sufijo" class="input-1">
+                <select id="sufijo-search" class="input-1">
                     <option>Lt</option>
                     <option>B0</option>
                 </select>
                 
                 <input id="codigo" class="input-2" type="number" placeholder="4400">
 
-                <select id="generacion" class="input-3">
+                <select id="generacion-search" class="input-3">
                     <option>L6</option>
                     <option>L5</option>
                     <option>L7</option>
@@ -158,11 +158,12 @@
         document.getElementById("search").addEventListener("submit", function (event) {
             event.preventDefault();
             
+            
             if (document.getElementById("codigo").value != "") {
                 let formData = {
-                    sufijo: document.getElementById("sufijo").value,
+                    sufijo: document.getElementById("sufijo-search").value,
                     codigo: document.getElementById("codigo").value,
-                    generacion: document.getElementById("generacion").value,
+                    generacion: document.getElementById("generacion-search").value,
                 }
 
                 fetch('https://carlosriveros.online/api/viewLocation',{
