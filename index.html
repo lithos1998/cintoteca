@@ -56,12 +56,12 @@
 
                     <div>
                         <label>De:</label>
-                        <input id="codigo-de" class="" name="codigo-de" type="text" placeholder="4400">
+                        <input id="codigo-de" class="" name="codigo-de" type="number" placeholder="4400">
                     </div>
                         
                     <div>
                         <label>Hasta:</label>
-                        <input id="codigo-hasta" class="" name="codigo-hasta" type="text" placeholder="4449">
+                        <input id="codigo-hasta" class="" name="codigo-hasta" type="number" placeholder="4449">
                     </div>
 
                     <div>
@@ -87,13 +87,13 @@
             <h2>Estanteria nº <span id="estanteria-loc"></span></h2>
 
             <div class="estantes">
-                <div id="a"></div>
-                <div id="b"></div>
-                <div id="c"></div>
-                <div id="d"></div>
-                <div id="e"></div>
-                <div id="f"></div>
-                <div id="g"></div>
+                <div class="estante" id="a"></div>
+                <div class="estante" id="b"></div>
+                <div class="estante" id="c"></div>
+                <div class="estante" id="d"></div>
+                <div class="estante" id="e"></div>
+                <div class="estante" id="f"></div>
+                <div class="estante" id="g"></div>
             </div>
         </div>
         <p id="close-modal">⊗</p>
@@ -132,6 +132,7 @@
         noti_title = document.getElementById("notification-title");
         noti_icon = document.getElementById("notification-icon");
         noti_text = document.getElementById("notification-text");
+        selected = "";
         icon_error = "⊗";
         icon_succes = "✔";
         
@@ -142,6 +143,11 @@
             } else {
                 modal.classList.add("d-none");
                 modal_notification.classList.remove("aproved", "denegated");
+                // clean Estantes
+                selected.classList.remove('selected');
+                selected.innerHTML = "";
+                // clean inputs
+                document.getElementById("codigo").value = "";
             }    
         }
 
@@ -157,8 +163,7 @@
         // petitions
         document.getElementById("search").addEventListener("submit", function (event) {
             event.preventDefault();
-            
-            
+                    
             if (document.getElementById("codigo").value != "") {
                 let formData = {
                     sufijo: document.getElementById("sufijo-search").value,
@@ -193,10 +198,11 @@
 
                     if (data['codigo'] != undefined) {
                         let clase = data['estante'];
+                        selected = document.getElementById(clase);
                         document.getElementById("cinta").innerText = data['codigo'];
                         document.getElementById("estanteria-loc").innerText = data['estanteria'];
-                        document.getElementById(clase).classList.add('selected');
-                        document.getElementById(clase).innerHTML = "<p>"+clase+"</p>";
+                        selected.classList.add('selected');
+                        selected.innerHTML = "<p>"+clase+"</p>";
 
                         viewModal(modal_show, "show");
                     }                    
@@ -262,6 +268,9 @@
                 });
                 
                 viewModal(modal, "hide"); 
+                
+                document.getElementById("codigo-de").value = "";
+                document.getElementById("codigo-hasta").value = "";
             }else{
                 document.getElementById("codigo-de").classList.add("invalid");
                 document.getElementById("codigo-hasta").classList.add("invalid");
